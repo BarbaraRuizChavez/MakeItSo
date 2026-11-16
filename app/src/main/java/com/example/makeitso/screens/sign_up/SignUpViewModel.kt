@@ -16,6 +16,7 @@ limitations under the License.
 
 package com.example.makeitso.screens.sign_up
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.SETTINGS_SCREEN
@@ -27,6 +28,7 @@ import com.example.makeitso.common.snackbar.SnackbarManager
 import com.example.makeitso.model.service.AccountService
 import com.example.makeitso.model.service.LogService
 import com.example.makeitso.screens.MakeItSoViewModel
+import com.google.firebase.auth.FirebaseAuthException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -72,7 +74,17 @@ class SignUpViewModel @Inject constructor(
     }
 
     launchCatching {
-      //TODO
+      try {
+        accountService.linkAccount(email, password)
+      } catch (ex: FirebaseAuthException) {
+        Log.e(TAG, "Firebase Auth link failed: ${ex.errorCode}")
+        throw ex
+      }
+      openAndPopUp(SETTINGS_SCREEN, SIGN_UP_SCREEN)
     }
+  }
+
+  companion object {
+    private const val TAG = "SignUpViewModel"
   }
 }
