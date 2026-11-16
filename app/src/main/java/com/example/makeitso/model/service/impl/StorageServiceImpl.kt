@@ -42,7 +42,9 @@ constructor(private val firestore: FirebaseFirestore, private val auth: AccountS
       }
 
   override suspend fun getTask(taskId: String): Task? =
-    firestore.collection(TASK_COLLECTION).document(taskId).get().await().toObject()
+    trace(GET_TASK_TRACE) {
+      firestore.collection(TASK_COLLECTION).document(taskId).get().await().toObject()
+    }
 
   override suspend fun save(task: Task): String =
     trace(SAVE_TASK_TRACE) {
@@ -56,13 +58,17 @@ constructor(private val firestore: FirebaseFirestore, private val auth: AccountS
     }
 
   override suspend fun delete(taskId: String) {
-    firestore.collection(TASK_COLLECTION).document(taskId).delete().await()
+    trace(DELETE_TASK_TRACE) {
+      firestore.collection(TASK_COLLECTION).document(taskId).delete().await()
+    }
   }
 
   companion object {
     private const val USER_ID_FIELD = "userId"
     private const val TASK_COLLECTION = "tasks"
+    private const val GET_TASK_TRACE = "getTask"
     private const val SAVE_TASK_TRACE = "saveTask"
     private const val UPDATE_TASK_TRACE = "updateTask"
+    private const val DELETE_TASK_TRACE = "deleteTask"
   }
 }

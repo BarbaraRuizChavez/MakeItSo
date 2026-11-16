@@ -45,26 +45,34 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
       awaitClose { auth.removeAuthStateListener(listener) }
     }
 
-  override suspend fun authenticate(email: String, password: String) {
-    auth.signInWithEmailAndPassword(email, password).await()
-  }
+  override suspend fun authenticate(email: String, password: String): Unit =
+    trace(AUTHENTICATE_TRACE) {
+      auth.signInWithEmailAndPassword(email, password).await()
+      Unit
+    }
 
-  override suspend fun sendRecoveryEmail(email: String) {
-    auth.sendPasswordResetEmail(email).await()
-  }
+  override suspend fun sendRecoveryEmail(email: String): Unit =
+    trace(RECOVERY_EMAIL_TRACE) {
+      auth.sendPasswordResetEmail(email).await()
+    }
 
-  override suspend fun createAnonymousAccount() {
-    auth.signInAnonymously().await()
-  }
+  override suspend fun createAnonymousAccount(): Unit =
+    trace(CREATE_ANONYMOUS_ACCOUNT_TRACE) {
+      auth.signInAnonymously().await()
+      Unit
+    }
 
-  override suspend fun linkAccount(email: String, password: String) {
-    val credential = EmailAuthProvider.getCredential(email, password)
-    auth.currentUser!!.linkWithCredential(credential).await()
-  }
+  override suspend fun linkAccount(email: String, password: String): Unit =
+    trace(LINK_ACCOUNT_TRACE) {
+      val credential = EmailAuthProvider.getCredential(email, password)
+      auth.currentUser!!.linkWithCredential(credential).await()
+      Unit
+    }
 
-  override suspend fun deleteAccount() {
-    auth.currentUser!!.delete().await()
-  }
+  override suspend fun deleteAccount(): Unit =
+    trace(DELETE_ACCOUNT_TRACE) {
+      auth.currentUser!!.delete().await()
+    }
 
   override suspend fun signOut() {
     if (auth.currentUser!!.isAnonymous) {
@@ -77,6 +85,10 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
   }
 
   companion object {
+    private const val AUTHENTICATE_TRACE = "authenticate"
+    private const val RECOVERY_EMAIL_TRACE = "sendRecoveryEmail"
+    private const val CREATE_ANONYMOUS_ACCOUNT_TRACE = "createAnonymousAccount"
+    private const val DELETE_ACCOUNT_TRACE = "deleteAccount"
     private const val LINK_ACCOUNT_TRACE = "linkAccount"
   }
 }
